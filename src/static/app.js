@@ -10,8 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/activities");
       const activities = await response.json();
 
-      // Clear loading message
+      // Clear loading message / list
       activitiesList.innerHTML = "";
+
+      // Clear activity select options except the placeholder
+      const firstOption = activitySelect.querySelector("option[value='']");
+      activitySelect.innerHTML = "";
+      if (firstOption) activitySelect.appendChild(firstOption);
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -20,11 +25,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        // Build participants section HTML
+        let participantsHTML = "";
+        if (Array.isArray(details.participants) && details.participants.length > 0) {
+          participantsHTML += `<div class="participants-section"><strong>Participants:</strong><ul class="participants-list">`;
+          details.participants.forEach((p) => {
+            // derive initials from email or name
+            const id = (p || "").toString();
+            const namePart = id.split("@")[0] || id;
+            const initials = namePart
+              .split(/[\.\-_ ]+/)
+              .map(s => s.charAt(0).toUpperCase())
+              .slice(0, 2)
+              .join("") || "XX";
+
+            participantsHTML += `
+              <li>
+                <span class="participant-avatar">${initials}</span>
+                <span class="participant-email">${id}</span>
+              </li>`;
+          });
+          participantsHTML += `</ul></div>`;
+        } else {
+          participantsHTML += `<div class="participants-empty">No participants yet. Be the first to sign up!</div>`;
+        }
+
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          ${participantsHTML}
         `;
 
         activitiesList.appendChild(activityCard);
