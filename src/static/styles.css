@@ -89,8 +89,8 @@ section h3 {
 
 /* Bulleted list, compact and pretty */
 .participants-list {
-  list-style: disc inside;
-  margin-left: 6px;
+  list-style: none; /* hide default bullets */
+  margin-left: 0;
   padding-left: 0;
   display: block;
 }
@@ -106,6 +106,30 @@ section h3 {
   border-radius: 6px;
   font-size: 14px;
   color: #2c3e50;
+}
+
+/* Delete/trash icon button */
+.participant-delete {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.participant-delete:hover {
+  background-color: rgba(198,40,40,0.08);
+}
+
+.participant-delete:focus {
+  outline: 2px solid rgba(198,40,40,0.2);
 }
 
 /* Small circular avatar with initials */

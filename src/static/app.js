@@ -39,10 +39,12 @@ document.addEventListener("DOMContentLoaded", () => {
               .slice(0, 2)
               .join("") || "XX";
 
+            // include a delete button with data attributes to identify activity and email
             participantsHTML += `
               <li>
                 <span class="participant-avatar">${initials}</span>
                 <span class="participant-email">${id}</span>
+                <button class="participant-delete" data-activity="${encodeURIComponent(name)}" data-email="${encodeURIComponent(id)}" title="Unregister">🗑️</button>
               </li>`;
           });
           participantsHTML += `</ul></div>`;
@@ -59,6 +61,36 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         activitiesList.appendChild(activityCard);
+
+        // Attach click handlers for participant delete buttons within this activity card
+        activityCard.querySelectorAll('.participant-delete').forEach((btn) => {
+          btn.addEventListener('click', async (event) => {
+            const activityName = decodeURIComponent(btn.dataset.activity);
+            const email = decodeURIComponent(btn.dataset.email);
+
+            if (!confirm(`Unregister ${email} from ${activityName}?`)) return;
+
+            try {
+              const resp = await fetch(`/activities/${encodeURIComponent(activityName)}/participants?email=${encodeURIComponent(email)}`, {
+                method: 'DELETE'
+              });
+
+              const data = await resp.json();
+              if (resp.ok) {
+                // remove the list item from DOM
+                const li = btn.closest('li');
+                if (li) li.remove();
+                // optionally refetch to update availability/badges
+                fetchActivities();
+              } else {
+                alert(data.detail || 'Failed to unregister participant');
+              }
+            } catch (err) {
+              console.error('Error unregistering participant:', err);
+              alert('Error unregistering participant. See console for details.');
+            }
+          });
+        });
 
         // Add option to select dropdown
         const option = document.createElement("option");
